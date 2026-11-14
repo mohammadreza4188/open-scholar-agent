@@ -42,6 +42,8 @@ def main(argv: list[str] | None = None) -> int:
 
     settings = Settings.from_env()
     logging.basicConfig(level=settings.log_level)
+    for noisy in ("httpx", "httpcore"):  # request logging prints full URLs (Telegram puts its token in the path)
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
     if args.command == "config":
         print(settings)
