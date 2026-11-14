@@ -18,6 +18,9 @@ class DegreeLevel(StrEnum):
     PHD = "phd"
 
 
+DEGREE_ORDER = {DegreeLevel.BACHELOR: 1, DegreeLevel.MASTER: 2, DegreeLevel.PHD: 3}
+
+
 class DegreeStatus(StrEnum):
     COMPLETED = "completed"
     IN_PROGRESS = "in_progress"
@@ -103,6 +106,15 @@ class UserProfile(BaseModel):
 
     def is_enrolled(self, level: DegreeLevel) -> bool:
         return any(d.level == level and d.status == DegreeStatus.IN_PROGRESS for d in self.degrees)
+
+    def has_completed_at_least(self, level: DegreeLevel) -> bool:
+        """A completed degree at `level` or above. In-progress degrees never count."""
+        return any(d.status == DegreeStatus.COMPLETED and DEGREE_ORDER[d.level] >= DEGREE_ORDER[level]
+                   for d in self.degrees)
+
+    def has_any_record(self, level: DegreeLevel) -> bool:
+        """Completed OR in-progress degree at exactly `level` (for 'previous enrollment' rules)."""
+        return any(d.level == level for d in self.degrees)
 
     @property
     def highest_completed(self) -> DegreeLevel | None:
