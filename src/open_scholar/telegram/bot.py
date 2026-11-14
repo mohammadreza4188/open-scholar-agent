@@ -56,11 +56,13 @@ class BotHandler:
     def __init__(self, session_factory: sessionmaker[Session], transport: Transport,
                  rate_limiter: RateLimiter | None = None,
                  providers: list[SearchProvider] | None = None,
+                 llm=None, fetcher=None, max_pages: int = 5, cost_fn=lambda i, o: 0.0,
                  clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc)):
         self.sf, self.transport = session_factory, transport
         self.limiter = rate_limiter or RateLimiter()
         self.providers = providers if providers is not None else [MockSearchProvider()]
         self.clock = clock
+        self.llm, self.fetcher, self.max_pages, self.cost_fn = llm, fetcher, max_pages, cost_fn
         self._run_locks: dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
 
     async def handle(self, telegram_id: int, text: str, name: str | None = None) -> None:
@@ -88,7 +90,9 @@ class BotHandler:
             return "یک اجرا در حال انجام است. A run is already in progress."
         async with lock:
             try:
-                return await run_for_user(s, user, self.providers, self.clock())
+                return await run_for_user(s, user, self.providers, self.clock(), llm=self.llm,
+                                          fetcher=self.fetcher, max_pages=self.max_pages,
+                                          cost_fn=self.cost_fn)
             except NoProfileError:
                 return NO_PROFILE
             except Exception:  # never leak internals to the chat

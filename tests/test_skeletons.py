@@ -4,7 +4,7 @@ from open_scholar.config.profile_loader import load_profile
 from open_scholar.config.settings import Settings
 from open_scholar.database.repository import UserRepository
 from open_scholar.database.session import init_db, make_engine, make_session_factory
-from open_scholar.llm.mock import get_llm
+from open_scholar.llm.factory import get_llm
 from open_scholar.search.mock import MockSearchProvider
 from open_scholar.search.registry import build_providers, search_all
 from open_scholar.telegram.bot import BotHandler, RateLimiter
@@ -20,7 +20,8 @@ async def test_search_reports_failures_and_mock_fallback():
 
 
 def test_llm_optional():
-    assert get_llm("none") is None
+    assert get_llm(Settings(llm_provider="none")) is None
+    assert get_llm(Settings()) is None  # auto with no keys -> disabled
 
 
 def test_settings_repr_hides_secrets():

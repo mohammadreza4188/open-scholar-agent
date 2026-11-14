@@ -70,6 +70,10 @@ def evaluate_eligibility(opp: OpportunityRecord, profile: UserProfile) -> Eligib
     checks: list[Check] = []
 
     def add(code, requirement, fact, result, explanation):
+        # A requirement from a non-official source is not a *confirmed* disqualifier: never hard-fail on it.
+        if result == CheckResult.FAIL and not r.official and code != "opportunity_open":
+            result = CheckResult.UNKNOWN
+            explanation = f"Unconfirmed (source not official): {explanation}"
         checks.append(Check(code=code, requirement=requirement, profile_fact=fact, result=result,
                             explanation=explanation, confidence=conf, source_url=src))
 

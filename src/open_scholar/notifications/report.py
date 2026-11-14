@@ -50,6 +50,9 @@ class SearchSummary:
     sources_checked: list[str] = field(default_factory=list)
     sources_failed: dict[str, str] = field(default_factory=dict)
     new_count: int = 0
+    pages_fetched: int = 0
+    pages_failed: dict[str, str] = field(default_factory=dict)
+    extraction_methods: list[str] = field(default_factory=list)  # "rules" or "llm:<provider>:<model>"
 
 
 def days_left(opp: OpportunityRecord, today: date, tz: ZoneInfo) -> int | None:
@@ -206,6 +209,9 @@ def build_daily_report(entries: list[ReportEntry], summary: SearchSummary, now: 
     out.append(f"منابع بررسی‌شده: {', '.join(summary.sources_checked) or 'هیچ'}")
     if summary.sources_failed:
         out.append("منابع ناموفق: " + "؛ ".join(f"{k} ({v})" for k, v in summary.sources_failed.items()))
+    if summary.pages_fetched or summary.pages_failed:
+        meth = ", ".join(summary.extraction_methods) or "-"
+        out.append(f"صفحات بررسی‌شده: {summary.pages_fetched} | ناموفق: {len(summary.pages_failed)} | روش استخراج: {meth}")
     out.append("توجه: پوشش جستجو کامل یا جهانی نیست؛ فقط منابع بالا بررسی شده‌اند.")
     actionable = len(masters) + len(interns) + len(phds)
     if actionable == 0:

@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from open_scholar.core.opportunity import (Category, FundingType, OpportunityRecord, Requirements,
                                            VerificationStatus)
 
-from .models import Opportunity, OpportunityChange
+from .models import Opportunity, OpportunityChange, OpportunityEvidence
 
 _TRACKED = ("deadline", "funding_type", "verification_status", "application_url")
 _IGNORE_NEW = {"funding_type": "unknown", "verification_status": "unverified"}  # never downgrade to "unknown"
@@ -48,6 +48,14 @@ def upsert(session: Session, rec: OpportunityRecord, discovered_url: str | None 
     if created:
         row = Opportunity(fingerprint=fp, title=rec.title, first_seen=now)
         session.add(row)
+    update(session, row, rec, discovered_url, now, created)
+    return row, created
+
+
+def update(session: Session, row: Opportunity, rec: OpportunityRecord, discovered_url: str | None = None,
+           now: datetime | None = None, created: bool = False) -> None:
+    """Apply `rec` to `row` without ever erasing known facts with 'unknown'; record tracked changes."""
+    now = now or datetime.now(timezone.utc)
     new_vals = {
         "title": rec.title, "organization": rec.organization, "country": rec.country,
         "category": rec.category.value, "field": rec.field, "official_url": rec.official_url,
@@ -68,7 +76,14 @@ def upsert(session: Session, rec: OpportunityRecord, discovered_url: str | None 
         row.requirements = rec.requirements.model_dump(mode="json")
     row.last_checked = now
     session.flush()
-    return row, created
+
+
+def add_evidence(session: Session, row: Opportunity, claim: str, quote: str, source_url: str,
+                 official: bool) -> None:
+    exists = any(e.claim == claim and e.quote == quote for e in row.evidence)
+    if not exists:
+        session.add(OpportunityEvidence(opportunity=row, claim=claim, quote=quote[:2000],
+                                        source_url=source_url, is_official=official))
 
 
 def to_record(row: Opportunity) -> OpportunityRecord:

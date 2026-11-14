@@ -3,17 +3,24 @@ from __future__ import annotations
 
 import logging
 
+import httpx
+
 from open_scholar.config.settings import Settings
 
 from .base import SearchError, SearchProvider, SearchResult
+from .brave import BraveSearchProvider
 from .mock import MockSearchProvider
+from .tavily import TavilySearchProvider
 
 log = logging.getLogger(__name__)
 
 
-def build_providers(settings: Settings) -> list[SearchProvider]:
+def build_providers(settings: Settings, client: httpx.AsyncClient | None = None) -> list[SearchProvider]:
     providers: list[SearchProvider] = []
-    # TODO(Phase 1b): BraveSearchProvider(settings.brave_api_key), TavilyProvider(...)
+    if settings.brave_api_key:
+        providers.append(BraveSearchProvider(settings.brave_api_key, client))
+    if settings.tavily_api_key:
+        providers.append(TavilySearchProvider(settings.tavily_api_key, client))
     if not providers:
         log.warning("No search API keys configured; using MockSearchProvider.")
         providers.append(MockSearchProvider())
