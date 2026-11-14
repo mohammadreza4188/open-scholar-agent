@@ -1,0 +1,43 @@
+# Sample development profile (no personal identifiers).
+schema_version: 1
+profile:
+  education:
+    bachelor:
+      degree: "BSc Computer Science"
+      gpa: "16.47/20"
+      completed: true
+    current_master:
+      degree: "MSc Computer Science"
+      specialization: "Soft Computing and Artificial Intelligence"
+      university: "Shahid Bahonar University of Kerman"
+      country: "Iran"
+      enrollment: "October 2026"
+      currently_enrolled: true
+      completed: false
+  research_interests:
+    - Artificial Intelligence
+    - Machine Learning
+    - Deep Learning
+    - Soft Computing
+    - Fuzzy Systems
+    - Computer Vision
+    - Natural Language Processing
+    - Large Language Models
+    - Reinforcement Learning
+    - Explainable AI
+    - Data Science
+  projects:
+    - name: "Bearing Fault Diagnosis"
+      technologies: [CNN, Fuzzy Logic, Python]
+    - name: "Olympic Medal Prediction"
+      technologies: [Machine Learning, Data Analysis, Python]
+    - name: "Automotive Diagnostics Tool"
+      technologies: [Python, Automotive Diagnostics]
+  preferences:
+    priority_order: [funded_masters, paid_internships, direct_entry_phd]
+    worldwide: true
+    exclude_countries: []
+    funding:
+      full_funding: true
+      partial_funding: true
+      paid_internships: true

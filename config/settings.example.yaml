@@ -1,0 +1,4 @@
+# Non-secret settings. Secrets belong in .env.
+timezone: "UTC"
+daily_report_time: "08:00"
+language: "fa"
