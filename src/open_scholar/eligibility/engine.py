@@ -91,6 +91,9 @@ def evaluate_eligibility(opp: OpportunityRecord, profile: UserProfile) -> Eligib
             + ("" if ok or not profile.is_enrolled(req) else "; a degree in progress does not count."))
 
     # 2. Degree required before enrollment (may be satisfied later)
+    # TODO(Phase 3): graduation/start dates are free text today, so an in-progress degree is always
+    # CONDITIONAL (-> Likely Eligible). Parse dates strictly and compare expected graduation with the
+    # program start; return FAIL when graduation is provably after enrollment.
     pre = r.degree_required_before_enrollment
     if pre is not None:
         if profile.has_completed_at_least(pre):

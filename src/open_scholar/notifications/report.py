@@ -72,7 +72,11 @@ def _v(x) -> str:
     return str(x) if x not in (None, "") else UNKNOWN
 
 
-def _reject_reasons(e: ReportEntry, left: int | None) -> list[str]:
+PHD_C_HOLDER = ("نیازمند مدرک کارشناسی ارشد تکمیل‌شده (شما از قبل دارید) — ورود مستقیم دکتری نیست "
+                "(Requires a completed Master's degree (You already hold one))")
+
+
+def _reject_reasons(e: ReportEntry, left: int | None, holder: bool = False) -> list[str]:
     o = e.opp
     reasons = [REJECT_FA.get(c.code, c.explanation) for c in e.decision.failed]
     if o.verification_status == VerificationStatus.UNVERIFIED:
@@ -80,7 +84,7 @@ def _reject_reasons(e: ReportEntry, left: int | None) -> list[str]:
     if left is not None and left < 0:
         reasons.append("مهلت درخواست گذشته است")
     if o.category == Category.PHD and o.phd_entry_category == "C":
-        reasons.append("مدرک کارشناسی ارشد تکمیل‌شده در زمان درخواست لازم است")
+        reasons.append(PHD_C_HOLDER if holder else "مدرک کارشناسی ارشد تکمیل‌شده در زمان درخواست لازم است")
     if o.category == Category.PHD and o.phd_entry_category is None:
         reasons.append("شرط مدرک ورود مستقیم دکتری تأیید نشده است")
     if o.category in (Category.MASTERS, Category.INTERNSHIP):
@@ -151,7 +155,10 @@ def build_daily_report(entries: list[ReportEntry], summary: SearchSummary, now: 
                 and (left is None or left >= 0)
             if blocked and live:
                 not_elig_phd.append(e)
-            elif not live:
+            elif live:
+                # User already holds the Master's: still not a direct-entry PhD -> rejected section.
+                rejected.append((e, _reject_reasons(e, left, holder=True)))
+            else:
                 rejected.append((e, reasons))
             continue
         if hard:

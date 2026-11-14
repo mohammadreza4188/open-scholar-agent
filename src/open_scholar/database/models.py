@@ -81,6 +81,9 @@ class Opportunity(Base):
     deadline_has_time: Mapped[bool] = mapped_column(Boolean, default=False)
     verification_status: Mapped[str] = mapped_column(String(20), default="unverified", index=True)
     verification_notes: Mapped[str | None] = mapped_column(Text)
+    duration: Mapped[str | None] = mapped_column(String(100))
+    start_date: Mapped[str | None] = mapped_column(String(100))
+    requirements: Mapped[dict] = mapped_column(JSON, default=dict)
     first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_checked: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 

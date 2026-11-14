@@ -61,7 +61,8 @@ def match_score(opp: OpportunityRecord, profile: UserProfile, now: datetime,
         why.append(f"category priority #{order.index(key) + 1}")
 
     if opp.deadline:
-        days = (opp.deadline - now).total_seconds() / 86400
+        dl = opp.deadline if opp.deadline.tzinfo else opp.deadline.replace(tzinfo=now.tzinfo)  # date-only
+        days = (dl - now).total_seconds() / 86400
         if days >= 14:
             pts += w.time_left
         elif days >= 0:

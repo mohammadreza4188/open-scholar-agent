@@ -17,6 +17,7 @@ class Settings:
     database_url: str = "sqlite:///data/open_scholar.db"
     log_level: str = "INFO"
     telegram_bot_token: str | None = None
+    telegram_allowed_user_ids: tuple[int, ...] = ()
     brave_api_key: str | None = None
     tavily_api_key: str | None = None
     llm_provider: str = "none"
@@ -30,6 +31,8 @@ class Settings:
             database_url=os.environ.get("OSA_DATABASE_URL", cls.database_url),
             log_level=os.environ.get("OSA_LOG_LEVEL", cls.log_level),
             telegram_bot_token=_opt("TELEGRAM_BOT_TOKEN"),
+            telegram_allowed_user_ids=tuple(
+                int(x) for x in os.environ.get("TELEGRAM_ALLOWED_USER_IDS", "").replace(" ", "").split(",") if x),
             brave_api_key=_opt("BRAVE_API_KEY"),
             tavily_api_key=_opt("TAVILY_API_KEY"),
             llm_provider=os.environ.get("OSA_LLM_PROVIDER", "none").lower(),
