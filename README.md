@@ -115,5 +115,4 @@ Depending on your configuration:
 
 ```bash
 git clone https://github.com/mohammadreza4188/open-scholar-agent.git
-
 cd open-scholar-agent
